@@ -1,0 +1,19 @@
+apiVersion: dns.noderings.crossplane.io/v1alpha1
+kind: Record
+metadata:
+  annotations:
+    meta.upbound.io/example-id: dns/v1alpha1/record
+  labels:
+    testing.upbound.io/example-name: www
+  name: www
+spec:
+  forProvider:
+    name: www
+    records:
+    - 192.0.2.10
+    - 192.0.2.11
+    ttl: 300
+    type: A
+    zoneIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example

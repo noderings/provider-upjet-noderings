@@ -1,0 +1,23 @@
+apiVersion: dns.noderings.crossplane.io/v1alpha1
+kind: GeoRecord
+metadata:
+  annotations:
+    meta.upbound.io/example-id: dns/v1alpha1/georecord
+  labels:
+    testing.upbound.io/example-name: app
+  name: app
+spec:
+  forProvider:
+    continents:
+      EU: 198.51.100.10
+    countries:
+      JP: 203.0.113.10
+    default: 192.0.2.10
+    name: app
+    regions:
+      US-CA: 192.0.2.20
+    ttl: 60
+    type: A
+    zoneIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example

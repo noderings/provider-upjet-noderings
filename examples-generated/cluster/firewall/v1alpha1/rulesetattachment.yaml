@@ -1,0 +1,16 @@
+apiVersion: firewall.noderings.crossplane.io/v1alpha1
+kind: RulesetAttachment
+metadata:
+  annotations:
+    meta.upbound.io/example-id: firewall/v1alpha1/rulesetattachment
+  labels:
+    testing.upbound.io/example-name: web
+  name: web
+spec:
+  forProvider:
+    rulesetIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: web
+    virtualMachineIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: web

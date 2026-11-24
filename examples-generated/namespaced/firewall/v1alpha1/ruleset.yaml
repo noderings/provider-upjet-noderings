@@ -1,0 +1,12 @@
+apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+kind: Ruleset
+metadata:
+  annotations:
+    meta.upbound.io/example-id: firewall/v1alpha1/ruleset
+  labels:
+    testing.upbound.io/example-name: web
+  name: web
+  namespace: default
+spec:
+  forProvider:
+    name: web

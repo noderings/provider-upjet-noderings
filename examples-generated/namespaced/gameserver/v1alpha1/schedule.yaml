@@ -1,0 +1,27 @@
+apiVersion: gameserver.noderings.m.crossplane.io/v1alpha1
+kind: Schedule
+metadata:
+  annotations:
+    meta.upbound.io/example-id: gameserver/v1alpha1/schedule
+  labels:
+    testing.upbound.io/example-name: nightly
+  name: nightly
+  namespace: default
+spec:
+  forProvider:
+    cron:
+      hour: "4"
+      minute: "0"
+    gameServerIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: survival
+    name: nightly restart
+    onlyWhenOnline: true
+    task:
+    - action: command
+      payload: say Restarting in 5 minutes
+    - action: backup
+      timeOffset: 240
+    - action: power
+      payload: restart
+      timeOffset: 60

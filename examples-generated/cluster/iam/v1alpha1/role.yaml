@@ -1,0 +1,17 @@
+apiVersion: iam.noderings.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  annotations:
+    meta.upbound.io/example-id: iam/v1alpha1/role
+  labels:
+    testing.upbound.io/example-name: dns_admin
+  name: dns-admin
+spec:
+  forProvider:
+    description: Manages DNS zones and records
+    name: dns-admin
+    permissionIds: |-
+      ${setunion(
+          data.noderings_permissions.dns.ids,
+          [data.noderings_permission.list_ssh_keys.id],
+        )}

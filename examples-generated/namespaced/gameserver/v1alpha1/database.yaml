@@ -1,0 +1,16 @@
+apiVersion: gameserver.noderings.m.crossplane.io/v1alpha1
+kind: Database
+metadata:
+  annotations:
+    meta.upbound.io/example-id: gameserver/v1alpha1/database
+  labels:
+    testing.upbound.io/example-name: luckperms
+  name: luckperms
+  namespace: default
+spec:
+  forProvider:
+    gameServerIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: survival
+    name: luckperms
+    rotationTrigger: 2026-11

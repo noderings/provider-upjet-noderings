@@ -1,0 +1,12 @@
+apiVersion: iam.noderings.crossplane.io/v1alpha1
+kind: EnvironmentVariable
+metadata:
+  annotations:
+    meta.upbound.io/example-id: iam/v1alpha1/environmentvariable
+  labels:
+    testing.upbound.io/example-name: app_env
+  name: app-env
+spec:
+  forProvider:
+    key: app_env
+    value: production

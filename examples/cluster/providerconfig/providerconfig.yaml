@@ -1,0 +1,11 @@
+apiVersion: noderings.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: default
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      name: noderings-creds
+      namespace: crossplane-system
+      key: credentials

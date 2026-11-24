@@ -1,0 +1,14 @@
+apiVersion: compute.noderings.crossplane.io/v1alpha1
+kind: VirtualMachineSnapshot
+metadata:
+  annotations:
+    meta.upbound.io/example-id: compute/v1alpha1/virtualmachinesnapshot
+  labels:
+    testing.upbound.io/example-name: before_upgrade
+  name: before-upgrade
+spec:
+  forProvider:
+    description: Before the 2.0 upgrade
+    virtualMachineIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: web

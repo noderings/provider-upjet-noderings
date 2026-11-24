@@ -1,0 +1,56 @@
+# A custom role that can list SSH keys, a group, and the role assigned to the
+# group. Free.
+apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+kind: Role
+metadata:
+  name: ssh-key-reader
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: iam/v1alpha1/role
+  labels:
+    testing.upbound.io/example-name: ssh-key-reader
+spec:
+  forProvider:
+    name: ssh-key-reader-${Rand.RFC1123Subdomain}
+    description: Can list SSH keys
+    permissionIds:
+      # ListSSHKeys. Find IDs with the API or the Terraform noderings_permissions data source.
+      - 236c41ff-118a-4151-8047-d572e4cf45bd
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
+---
+apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+kind: Group
+metadata:
+  name: ops
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: iam/v1alpha1/role
+  labels:
+    testing.upbound.io/example-name: ops
+spec:
+  forProvider:
+    name: ops-${Rand.RFC1123Subdomain}
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
+---
+apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+kind: RoleAssignment
+metadata:
+  name: ops-ssh-key-reader
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: iam/v1alpha1/role
+spec:
+  forProvider:
+    roleIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: ssh-key-reader
+    groupIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: ops
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default

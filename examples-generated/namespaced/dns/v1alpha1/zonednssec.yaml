@@ -1,0 +1,14 @@
+apiVersion: dns.noderings.m.crossplane.io/v1alpha1
+kind: ZoneDNSSEC
+metadata:
+  annotations:
+    meta.upbound.io/example-id: dns/v1alpha1/zonednssec
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+  namespace: default
+spec:
+  forProvider:
+    zoneIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example

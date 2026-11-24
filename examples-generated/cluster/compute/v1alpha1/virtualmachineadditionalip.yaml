@@ -1,0 +1,14 @@
+apiVersion: compute.noderings.crossplane.io/v1alpha1
+kind: VirtualMachineAdditionalIP
+metadata:
+  annotations:
+    meta.upbound.io/example-id: compute/v1alpha1/virtualmachineadditionalip
+  labels:
+    testing.upbound.io/example-name: web
+  name: web
+spec:
+  forProvider:
+    count: 2
+    virtualMachineIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: web

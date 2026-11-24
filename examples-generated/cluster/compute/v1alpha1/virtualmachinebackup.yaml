@@ -1,0 +1,14 @@
+apiVersion: compute.noderings.crossplane.io/v1alpha1
+kind: VirtualMachineBackup
+metadata:
+  annotations:
+    meta.upbound.io/example-id: compute/v1alpha1/virtualmachinebackup
+  labels:
+    testing.upbound.io/example-name: web
+  name: web
+spec:
+  forProvider:
+    addonId: ${data.noderings_marketplace_addon.backup.id}
+    virtualMachineIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: web

@@ -1,0 +1,32 @@
+apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+kind: GroupMembership
+metadata:
+  annotations:
+    meta.upbound.io/example-id: iam/v1alpha1/groupmembership
+  labels:
+    testing.upbound.io/example-name: ops
+  name: ops
+  namespace: default
+spec:
+  forProvider:
+    groupIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: ops
+    serviceAccountIds:
+    - 00000000-0000-0000-0000-000000000000
+    userIds: ${data.noderings_users.ops.ids}
+
+---
+
+apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+kind: Group
+metadata:
+  annotations:
+    meta.upbound.io/example-id: iam/v1alpha1/groupmembership
+  labels:
+    testing.upbound.io/example-name: ops
+  name: ops
+  namespace: default
+spec:
+  forProvider:
+    name: ops

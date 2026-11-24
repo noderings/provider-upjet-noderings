@@ -1,0 +1,23 @@
+apiVersion: compute.noderings.crossplane.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  annotations:
+    meta.upbound.io/example-id: compute/v1alpha1/virtualmachine
+  labels:
+    testing.upbound.io/example-name: web
+  name: web
+spec:
+  forProvider:
+    deletionProtection: true
+    distro: ubuntu_24_04
+    hostname: web-1
+    planId: ${data.noderings_marketplace_offer.web.plan_id}
+    powerState: running
+    regionId: ${data.noderings_marketplace_offer.web.region_id}
+    sshKeyIdsRefs:
+    - name: noderings_ssh_key
+    tags:
+    - web
+    - prod
+    timeouts:
+    - create: 20m

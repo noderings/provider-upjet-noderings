@@ -1,0 +1,916 @@
+name: noderings/noderings
+resources:
+    noderings_dns_geo_record:
+        subCategory: DNS
+        description: 'A geo-routed record: resolvers get an answer chosen by their location. The most specific match wins: region, then country, then continent, then default. Only one geo record per name is supported.'
+        name: noderings_dns_geo_record
+        title: noderings_dns_geo_record Resource - noderings
+        examples:
+            - name: app
+              manifest: |-
+                {
+                  "continents": {
+                    "EU": "198.51.100.10"
+                  },
+                  "countries": {
+                    "JP": "203.0.113.10"
+                  },
+                  "default": "192.0.2.10",
+                  "name": "app",
+                  "regions": {
+                    "US-CA": "192.0.2.20"
+                  },
+                  "ttl": 60,
+                  "type": "A",
+                  "zone_id": "${noderings_dns_zone.example.id}"
+                }
+              references:
+                zone_id: noderings_dns_zone.example.id
+        argumentDocs:
+            continents: '(Map of String) Answers by continent code: AF, AN, AS, EU, NA, OC, SA.'
+            countries: (Map of String) Answers by ISO 3166-1 alpha-2 country code, for example DE.
+            default: (String) Answer for resolvers that match no other rule.
+            id: (String) <zone_id>/<name>/<type>.
+            name: (String) Owner name relative to the zone, in lower case. Use @ for the apex.
+            regions: (Map of String) Answers by ISO 3166-2 subdivision such as US-CA, or a region group such as US-IX.
+            ttl: (Number) Time to live in seconds, 30 to 60. Defaults to 60.
+            type: '(String) Record type: A, AAAA, CNAME, NAPTR, SRV.'
+            zone_id: (String) Zone ID.
+        importStatements:
+            - |-
+              # Import a geo record as <zone_id>/<name>/<type>.
+              terraform import noderings_dns_geo_record.app 00000000-0000-0000-0000-000000000000/app/A
+    noderings_dns_record:
+        subCategory: DNS
+        description: All records of one name and type in a zone (an RRset). Use one resource per name and type, with every value in records.
+        name: noderings_dns_record
+        title: noderings_dns_record Resource - noderings
+        examples:
+            - name: www
+              manifest: |-
+                {
+                  "name": "www",
+                  "records": [
+                    "192.0.2.10",
+                    "192.0.2.11"
+                  ],
+                  "ttl": 300,
+                  "type": "A",
+                  "zone_id": "${noderings_dns_zone.example.id}"
+                }
+              references:
+                zone_id: noderings_dns_zone.example.id
+            - name: mx
+              manifest: |-
+                {
+                  "name": "@",
+                  "records": [
+                    "10 mail.example.com.",
+                    "20 backup-mail.example.com."
+                  ],
+                  "ttl": 3600,
+                  "type": "MX",
+                  "zone_id": "${noderings_dns_zone.example.id}"
+                }
+              references:
+                zone_id: noderings_dns_zone.example.id
+            - name: spf
+              manifest: |-
+                {
+                  "name": "@",
+                  "records": [
+                    "v=spf1 mx -all"
+                  ],
+                  "ttl": 3600,
+                  "type": "TXT",
+                  "zone_id": "${noderings_dns_zone.example.id}"
+                }
+              references:
+                zone_id: noderings_dns_zone.example.id
+        argumentDocs:
+            allow_overwrite: (Boolean) Take over records of this name and type that already exist in the zone. Without it, creating fails if they exist. Defaults to false.
+            id: (String) <zone_id>/<name>/<type>.
+            name: (String) Owner name relative to the zone, in lower case, for example www or _dmarc. Use @ for the zone apex and * for a wildcard.
+            records: (Set of String) Record values in presentation format, for example 192.0.2.10, 10 mail.example.com. (MX) or 0 issue "letsencrypt.org" (CAA). Write TXT values as plain text without surrounding quotes; long values are split for you. Hostnames should end with a dot.
+            ttl: (Number) Time to live in seconds, 30 to 86400.
+            type: '(String) Record type: A, AAAA, ALIAS, CAA, CERT, CNAME, DNAME, DS, HINFO, HTTPS, LOC, MX, NAPTR, NS, OPENPGPKEY, PTR, RP, SMIMEA, SRV, SSHFP, SVCB, TLSA, TXT.'
+            zone_id: (String) Zone ID.
+        importStatements:
+            - |-
+              # Import records as <zone_id>/<name>/<type>. Use @ for the zone apex.
+              terraform import noderings_dns_record.www 00000000-0000-0000-0000-000000000000/www/A
+              terraform import noderings_dns_record.mx 00000000-0000-0000-0000-000000000000/@/MX
+    noderings_dns_zone:
+        subCategory: DNS
+        description: A DNS zone hosted on NodeRings. After creating it, point the domain's nameservers at the nameservers output at your registrar.
+        name: noderings_dns_zone
+        title: noderings_dns_zone Resource - noderings
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "deletion_protection": true,
+                  "name": "example.com"
+                }
+        argumentDocs:
+            created_at: (String) Creation time (RFC 3339).
+            delegation_ok: (Boolean) Whether the parent zone currently delegates to the NodeRings nameservers.
+            deletion_protection: (Boolean) When true, Terraform refuses to delete the zone. Defaults to false.
+            dnssec_mode: (String) unsigned, signed_ds_pending or signed_active. Manage DNSSEC with noderings_dns_zone_dnssec.
+            force_destroy: (Boolean) Delete the zone even while DNSSEC is active and the parent zone still has the DS record. That breaks resolution for validating resolvers until the DS is removed. Defaults to false.
+            id: (String) Zone ID.
+            name: (String) Domain name, for example example.com. Stored lower-case without a trailing dot. Changing it replaces the zone. A domain can be hosted by only one organization at a time.
+            nameservers: (List of String) Nameservers to set at the registrar.
+            state: (String) pending_ns until the domain is delegated to NodeRings, then active.
+            unicast_nameservers: (List of String) Optional additional unicast nameservers.
+        importStatements:
+            - |-
+              # Import a DNS zone by its ID.
+              terraform import noderings_dns_zone.example 00000000-0000-0000-0000-000000000000
+    noderings_dns_zone_dnssec:
+        subCategory: DNS
+        description: Signs a zone with DNSSEC. Add the ds value as a DS record at your registrar; the zone becomes signed_active once NodeRings sees it there.
+        name: noderings_dns_zone_dnssec
+        title: noderings_dns_zone_dnssec Resource - noderings
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "zone_id": "${noderings_dns_zone.example.id}"
+                }
+              references:
+                zone_id: noderings_dns_zone.example.id
+        argumentDocs:
+            algorithm: (String) Signing algorithm.
+            digest_type: (Number) DS digest type.
+            dnskey: (String) Public signing key.
+            ds: (String) DS record to add at the registrar, as <key tag> <algorithm> <digest type> <digest>.
+            ds_at_parent: (Boolean) Whether the parent zone has the DS record.
+            force_destroy: (Boolean) Turn DNSSEC off even while the registrar still has the DS record. That breaks resolution for validating resolvers until the DS is removed. Defaults to false.
+            id: (String) Same as zone_id.
+            key_tag: (Number) Key tag.
+            mode: (String) signed_ds_pending until the DS is seen at the parent, then signed_active.
+            zone_id: (String) Zone ID.
+        importStatements:
+            - |-
+              # Import DNSSEC settings by zone ID.
+              terraform import noderings_dns_zone_dnssec.example 00000000-0000-0000-0000-000000000000
+    noderings_environment_variable:
+        subCategory: IAM
+        description: 'An organization environment variable. Its value is not secret: anyone who can read the organization''s variables can see it. Use noderings_secret for credentials.'
+        name: noderings_environment_variable
+        title: noderings_environment_variable Resource - noderings
+        examples:
+            - name: app_env
+              manifest: |-
+                {
+                  "key": "app_env",
+                  "value": "production"
+                }
+        argumentDocs:
+            created_at: (String) Creation time (RFC 3339).
+            id: (String) Variable ID.
+            key: '(String) Key: lower-case letters, digits and _. Unique in the organization. Changing it replaces the variable.'
+            value: (String) Value, 1 to 32767 characters. Changing it updates the variable in place.
+        importStatements:
+            - |-
+              # Import an environment variable by its ID.
+              terraform import noderings_environment_variable.app_env 00000000-0000-0000-0000-000000000000
+    noderings_firewall_address_group:
+        subCategory: Firewall
+        description: A named list of CIDRs that firewall rules can use as a source or destination. Changes reach the virtual machines that use the group within about a minute. Creating a virtual machine creates an address group named exactly like the VM's hostname, and later overwrites its CIDRs. Do not give a managed group the hostname of a virtual machine.
+        name: noderings_firewall_address_group
+        title: noderings_firewall_address_group Resource - noderings
+        examples:
+            - name: office
+              manifest: |-
+                {
+                  "cidrs": [
+                    "203.0.113.0/24",
+                    "2001:db8:10::/48"
+                  ],
+                  "name": "office-networks"
+                }
+        argumentDocs:
+            cidrs: (Set of String) IPv4 and IPv6 CIDRs, for example 203.0.113.0/24 or 2001:db8::/48. The API stores each one as its network address with IPv6 compressed (192.0.2.5/24 becomes 192.0.2.0/24); write them that way to match what other tools show. Use 0.0.0.0/0 or ::/0 for every address.
+            created_at: (String) Creation time (RFC 3339).
+            id: (String) Address group ID.
+            name: (String) Name, 1 to 63 characters, unique in the organization. Creating a virtual machine creates an address group named exactly like the VM's hostname, and later overwrites its CIDRs. Do not give a managed group the hostname of a virtual machine.
+            updated_at: (String) Last update time (RFC 3339).
+        importStatements:
+            - |-
+              # Import a firewall address group by its ID.
+              terraform import noderings_firewall_address_group.office 00000000-0000-0000-0000-000000000000
+    noderings_firewall_ruleset:
+        subCategory: Firewall
+        description: 'A firewall ruleset: a named, ordered list of rules that can be attached to virtual machines. Manage its rules with noderings_firewall_ruleset_rules. A new ruleset is empty, and an empty ruleset filters nothing: the default policy is to accept traffic in both directions. Only virtual machines on Proxmox support firewall rulesets.'
+        name: noderings_firewall_ruleset
+        title: noderings_firewall_ruleset Resource - noderings
+        examples:
+            - name: web
+              manifest: |-
+                {
+                  "name": "web"
+                }
+        argumentDocs:
+            attached_vm_count: (Number) Number of virtual machines the ruleset is attached to.
+            attached_vm_hostnames: (List of String) Hostnames of the virtual machines the ruleset is attached to, sorted.
+            created_at: (String) Creation time (RFC 3339).
+            force_destroy: (Boolean) Delete the ruleset even while virtual machines use it. The API then detaches it from those virtual machines, and the rules last applied to them may stay in effect until they get another ruleset. With the default false, Terraform refuses to delete an attached ruleset; detach it first.
+            id: (String) Ruleset ID.
+            name: (String) Name, 1 to 63 characters, unique in the organization.
+            rule_count: (Number) Number of rules, ingress and egress together.
+        importStatements:
+            - |-
+              # Import a firewall ruleset by its ID.
+              terraform import noderings_firewall_ruleset.web 00000000-0000-0000-0000-000000000000
+    noderings_firewall_ruleset_attachment:
+        subCategory: Firewall
+        description: Attaches a firewall ruleset to a virtual machine. A VM has at most one ruleset; use one attachment per VM. Only platforms with the guest_firewall capability (Proxmox) support firewalls. Rule changes reach the VM within about a minute; the API does not report when they are applied. The platform marks the VM as running when a ruleset is attached or detached. If the VM was stopped, this resource stops it again afterwards, so power_state on noderings_virtual_machine does not drift.
+        name: noderings_firewall_ruleset_attachment
+        title: noderings_firewall_ruleset_attachment Resource - noderings
+        examples:
+            - name: web
+              manifest: |-
+                {
+                  "ruleset_id": "${noderings_firewall_ruleset.web.id}",
+                  "virtual_machine_id": "${noderings_virtual_machine.web.id}"
+                }
+              references:
+                ruleset_id: noderings_firewall_ruleset.web.id
+                virtual_machine_id: noderings_virtual_machine.web.id
+        argumentDocs:
+            id: (String) Same as virtual_machine_id.
+            ruleset_id: '(String) ID of the firewall ruleset. Changes in place: the old ruleset is detached, then the new one attached.'
+            virtual_machine_id: (String) ID of the virtual machine. Changing it replaces the attachment.
+        importStatements:
+            - |-
+              # Import a ruleset attachment by the virtual machine's ID.
+              terraform import noderings_firewall_ruleset_attachment.web 00000000-0000-0000-0000-000000000000
+    noderings_firewall_ruleset_rules:
+        subCategory: Firewall
+        description: 'The rules of one firewall ruleset, as one ordered list. This resource is authoritative: it creates, updates, reorders and deletes rules so that the ruleset holds exactly the rule blocks in the configuration, in that order, and rules added outside Terraform show up as changes to remove. Use one noderings_firewall_ruleset_rules per ruleset. Rules are evaluated top to bottom, ingress and egress in one list, and the first matching rule decides. Traffic that matches no rule is accepted, so for a default-deny policy end the list with drop rules for 0.0.0.0/0 and ::/0. Changes reach the virtual machines the ruleset is attached to within about a minute; the API does not report when they are applied.'
+        name: noderings_firewall_ruleset_rules
+        title: noderings_firewall_ruleset_rules Resource - noderings
+        examples:
+            - name: web
+              manifest: |-
+                {
+                  "rule": [
+                    {
+                      "action": "accept",
+                      "destination_ports": "443",
+                      "direction": "ingress",
+                      "protocol": "tcp",
+                      "source": [
+                        {
+                          "cidrs": [
+                            "0.0.0.0/0"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "action": "accept",
+                      "destination_ports": "443",
+                      "direction": "ingress",
+                      "protocol": "tcp",
+                      "source": [
+                        {
+                          "cidrs": [
+                            "::/0"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "action": "accept",
+                      "destination_ports": "22",
+                      "direction": "ingress",
+                      "protocol": "tcp",
+                      "source": [
+                        {
+                          "address_group_ids": [
+                            "${noderings_firewall_address_group.office.id}"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "action": "drop",
+                      "direction": "ingress",
+                      "protocol": "any",
+                      "source": [
+                        {
+                          "cidrs": [
+                            "0.0.0.0/0"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "action": "drop",
+                      "direction": "ingress",
+                      "protocol": "any",
+                      "source": [
+                        {
+                          "cidrs": [
+                            "::/0"
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "ruleset_id": "${noderings_firewall_ruleset.web.id}"
+                }
+              references:
+                rule.source.address_group_ids: noderings_firewall_address_group.office.id
+                ruleset_id: noderings_firewall_ruleset.web.id
+              dependencies:
+                noderings_firewall_address_group.office: |-
+                    {
+                      "cidrs": [
+                        "203.0.113.0/24",
+                        "2001:db8:10::/48"
+                      ],
+                      "name": "office-networks"
+                    }
+                noderings_firewall_ruleset.web: |-
+                    {
+                      "name": "web"
+                    }
+        argumentDocs:
+            action: (String) accept or drop.
+            address_group_ids: (Set of String) IDs of noderings_firewall_address_group resources. If every group and tag on this side stops resolving to an address (for example the virtual machine behind a hostname group was deleted), the platform skips the rule.
+            adopt_existing: '(Boolean) When the ruleset already has rules at create time, take them over: rules that match a rule block are kept, the rest are deleted. With the default false, creating this resource fails if the ruleset is not empty, so an existing rule list is never replaced by accident. You can also import the rules instead.'
+            cidrs: (Set of String) IPv4 or IPv6 addresses or CIDRs. 0.0.0.0/0 (any IPv4) and ::/0 (any IPv6) must be the only entry on their side, with no other CIDRs, address groups or tags; to match both families, omit the block or write two rules.
+            destination: '(Block, Optional) Which addresses the rule matches as the destination. Set at least one of the arguments. Entries of different kinds are combined: the rule matches any of them. Omit the block to match any destination address. (see below for nested schema)'
+            destination_ports: '(String) Destination port: one port such as 443 or one range such as 8000-8100. Lists are not supported; write one rule per port or range. Only for the protocols tcp, udp, sctp, dccp, udplite. Omit for any port.'
+            direction: (String) ingress (traffic to the virtual machine) or egress (traffic from it).
+            id: (String) Same as ruleset_id.
+            position: (Number) Position in the ruleset, starting at 0 (evaluated first).
+            protocol: '(String) IP protocol in lower case: any, tcp, udp, icmp, ipv6_icmp (ICMPv6) and others. One of tcp, udp, sctp, ipv6, icmp, icmpv6, esp, ah, ipsec, gre, ipip, vxlan, l2tp, geneve, any, igmp, ggp, ipencap, st, egp, igp, pup, hmp, xns_idp, rdp, iso_tp4, dccp, xtp, ddp, idpr_cmtp, ipv6_route, ipv6_frag, idrp, rsvp, skip, ipv6_icmp, ipv6_nonxt, ipv6_opts, vmtp, eigrp, ospf, ax_25, etherip, encap, pim, ipcomp, vrrp, isis, fc, mobility_header, udplite, mpls_in_ip, hip, shim6, wesp, rohc.'
+            rule: '(Block List) A rule. Order matters: the first block is evaluated first. At most 50 rules per ruleset. (see below for nested schema)'
+            ruleset_id: (String) ID of the noderings_firewall_ruleset. Changing it replaces this resource.
+            source: '(Block, Optional) Which addresses the rule matches as the source. Set at least one of the arguments. Entries of different kinds are combined: the rule matches any of them. Omit the block to match any source address. (see below for nested schema)'
+            source_ports: '(String) Source port: one port such as 443 or one range such as 8000-8100. Lists are not supported; write one rule per port or range. Only for the protocols tcp, udp, sctp, dccp, udplite. Omit for any port.'
+            vm_tags: (Set of String) Virtual machine tags, 1 to 100 characters each; they match the addresses of every virtual machine with the tag. Each tag must be on at least one existing virtual machine when the rule is written, so add depends_on for the virtual machines that carry it. If no virtual machine has the tag any more, the platform skips the rule.
+        importStatements:
+            - |-
+              # Import the rules of a firewall ruleset by the ruleset ID. All current rules
+              # are imported in their current order.
+              terraform import noderings_firewall_ruleset_rules.web 00000000-0000-0000-0000-000000000000
+    noderings_game_server:
+        subCategory: Game Servers
+        description: A game server ordered from a game-server plan. Creating it places an order that is billed according to the plan; Terraform waits until the game is installed. Destroying a fixed-price server forfeits the rest of the paid period.
+        name: noderings_game_server
+        title: noderings_game_server Resource - noderings
+        examples:
+            - name: survival
+              manifest: |-
+                {
+                  "accept_eula": true,
+                  "deletion_protection": true,
+                  "environment": {
+                    "MAX_PLAYERS": "30",
+                    "MINECRAFT_VERSION": "1.21.4"
+                  },
+                  "name": "survival",
+                  "plan_id": "${var.plan_id}",
+                  "power_state": "running",
+                  "template_id": "${data.noderings_game_server_games.paper.id}",
+                  "timeouts": [
+                    {
+                      "create": "45m"
+                    }
+                  ]
+                }
+              references:
+                plan_id: var.plan_id
+                template_id: data.noderings_game_server_games.paper.id
+        argumentDocs:
+            accept_eula: (Boolean) Accept the game's end-user licence agreement. Required when the game has one (noderings_game_server_games.eula). Only used when the server is created or its game changes. Not read back from the API.
+            allocation_limit: (Number) How many extra ports (allocations) the plan allows, besides the primary one.
+            allow_destructive_game_change: (Boolean) When true, changing template_id changes the game in place instead of replacing the server. The server keeps its address, but all files, schedules and backups are deleted. Defaults to false.
+            backup_limit: (Number) How many backups the plan allows.
+            create: (String) How long to wait for create, as a duration such as 30m. Defaults to 30m.
+            created_at: (String) Creation time (RFC 3339).
+            database_limit: (Number) How many databases the plan allows.
+            delete: (String) How long to wait for delete, as a duration such as 30m. Defaults to 15m.
+            deletion_protection: (Boolean) When true, Terraform refuses to delete the server. Defaults to false.
+            docker_image: (String) Container image the game runs in. Must be one of the game's images (noderings_game_server_startup.docker_images). Changes in place.
+            environment: '(Map of String) Startup variables, such as the game version or player limit. Only the keys listed here are managed; other variables keep their values. At creation, variables that cannot be edited may only be set to their default. Afterwards only user-editable variables can change. Keys are checked against the game''s variables (see noderings_game_server_games). A change applies the next time the game starts: restart the server (for example by setting power_state to offline and back) to use it. Removing a key stops managing it; the server keeps its current value.'
+            game_name: (String) Game, for example Minecraft.
+            icon: (String) Game icon name.
+            id: (String) Game server ID.
+            last_error: (String) Why the last install failed, if it did.
+            name: (String) Server name, 1 to 64 characters. Changes in place while the server is ready.
+            node_id: (String) Node the server runs on.
+            panel_identifier: (String) Short server identifier shown in support conversations.
+            phase: (String) pending while installing, ready, error (failed after payment; reinstall or change the game) or failed (failed before payment; delete it).
+            plan_billing_type: (String) subscription, usage or free.
+            plan_code: (String) Plan code, for example SC-GS-4C-8G-50.
+            plan_id: (String) Game-server plan ID. A server cannot move to another plan, so changing it replaces the server (its files are lost).
+            power_state: (String) running or offline. When set, Terraform starts or stops the server and waits for it. When not set, it reports the live state. New servers start once installed.
+            primary_ip: (String) IP address players connect to.
+            primary_port: (Number) Port players connect to.
+            provider_name: (String) Provider that hosts the server.
+            region_city: (String) Region city.
+            region_country: (String) Region country.
+            region_id: (String) Region to place the server in. Defaults to the region of the node the server is placed on. Changing it replaces the server.
+            template_id: (String) Game to install, the id of a noderings_game_server_games entry. Game IDs are specific to the plan's provider. Changing it replaces the server, unless allow_destructive_game_change is true.
+            timeouts: (Block, Optional) Timeouts for long-running operations. (see below for nested schema)
+            update: (String) How long to wait for update, as a duration such as 30m. Defaults to 30m.
+            variant: (String) Game variant, for example Paper.
+            version_value: (String) Game version to install, at most 64 characters. Only used when the server is created; to change the version later, set the game's version variable in environment. Not read back from the API.
+        importStatements:
+            - |-
+              # Import a game server by its ID. environment, accept_eula and version_value
+              # are not read back: add them to the configuration after importing.
+              terraform import noderings_game_server.survival 00000000-0000-0000-0000-000000000000
+    noderings_game_server_allocation:
+        subCategory: Game Servers
+        description: An extra port (allocation) for a game server, for example a query or voice port. NodeRings picks the IP and port. Extra allocations count against the plan's allocation_limit. The server's own primary address is not managed by this resource; read it from noderings_game_server.primary_ip and primary_port. The game server must be ready.
+        name: noderings_game_server_allocation
+        title: noderings_game_server_allocation Resource - noderings
+        examples:
+            - name: query
+              manifest: |-
+                {
+                  "game_server_id": "${noderings_game_server.survival.id}",
+                  "notes": "query port"
+                }
+              references:
+                game_server_id: noderings_game_server.survival.id
+        argumentDocs:
+            alias: (String) Host name alias for the IP, if any.
+            allocation_id: (Number) Allocation ID.
+            game_server_id: (String) ID of the game server. Changing it replaces the resource.
+            id: (String) <game_server_id>/<object ID>, also the import ID.
+            ip: (String) IP address.
+            notes: (String) Free-form notes, for example what the port is for. Changes in place.
+            port: (Number) Port.
+            primary: '(Boolean) Set to true to make this the server''s primary address, the one players connect to. It cannot be set back to false directly: make another allocation primary instead. Destroying a primary allocation first makes the server''s oldest other allocation primary.'
+        importStatements:
+            - |-
+              # Import an allocation as <game_server_id>/<allocation_id>.
+              terraform import noderings_game_server_allocation.query 00000000-0000-0000-0000-000000000000/1234
+    noderings_game_server_backup:
+        subCategory: Game Servers
+        description: A backup of a game server's files. Terraform waits until the backup has finished. Backups count against the plan's backup_limit. Changing the server's game deletes all its backups; Terraform then creates this one again. Only the most recent backups (about 20) are listed by the API, so with more backups than that, older ones read as deleted. Restoring a backup is not done through Terraform. The game server must be ready.
+        name: noderings_game_server_backup
+        title: noderings_game_server_backup Resource - noderings
+        examples:
+            - name: before_upgrade
+              manifest: |-
+                {
+                  "game_server_id": "${noderings_game_server.survival.id}",
+                  "locked": true,
+                  "name": "before 1.21 upgrade"
+                }
+              references:
+                game_server_id: noderings_game_server.survival.id
+        argumentDocs:
+            backup_id: (String) Backup ID.
+            bytes: (Number) Size in bytes.
+            completed_at: (String) When the backup finished.
+            create: (String) How long to wait for create, as a duration such as 30m. Defaults to 30m.
+            delete: (String) Not used.
+            game_server_id: (String) ID of the game server. Changing it replaces the resource.
+            id: (String) <game_server_id>/<object ID>, also the import ID.
+            locked: (Boolean) Lock the backup so it cannot be deleted, for example by a scheduled backup task making room. Terraform unlocks it before destroying it. Defaults to false.
+            name: (String) Backup name. Changing it creates a new backup and deletes this one.
+            successful: (Boolean) Whether the backup succeeded.
+            timeouts: (Block, Optional) Timeouts for long-running operations. (see below for nested schema)
+            update: (String) Not used.
+        importStatements:
+            - |-
+              # Import a backup as <game_server_id>/<backup_id>.
+              terraform import noderings_game_server_backup.before_upgrade 00000000-0000-0000-0000-000000000000/11111111-1111-1111-1111-111111111111
+    noderings_game_server_database:
+        subCategory: Game Servers
+        description: A MySQL database for a game server, for example for a plugin. Databases count against the plan's database_limit. The password is only returned when the database is created and when it is rotated; Terraform keeps it in state (marked sensitive). The game server must be ready.
+        name: noderings_game_server_database
+        title: noderings_game_server_database Resource - noderings
+        examples:
+            - name: luckperms
+              manifest: |-
+                {
+                  "game_server_id": "${noderings_game_server.survival.id}",
+                  "name": "luckperms",
+                  "rotation_trigger": "2026-11"
+                }
+              references:
+                game_server_id: noderings_game_server.survival.id
+        argumentDocs:
+            connections_from: (String) Hosts that may connect, as stored.
+            database_id: (String) Database ID.
+            full_name: (String) Database name as created, with the platform's prefix.
+            game_server_id: (String) ID of the game server. Changing it replaces the resource.
+            host: (String) Database host.
+            id: (String) <game_server_id>/<object ID>, also the import ID.
+            jdbc_url: (String, Sensitive) JDBC connection URL, including the password. Known under the same conditions as password.
+            name: '(String) Database name: letters, digits, _ and -, up to 48 characters. NodeRings adds a prefix (see full_name). Changing it replaces the database.'
+            password: '(String, Sensitive) Password. Only known after create or rotation: after an import it is empty until rotation_trigger changes.'
+            port: (Number) Database port.
+            remote: (String) Hosts that may connect, in MySQL notation. % (the default) allows any host. Changing it replaces the database.
+            rotation_trigger: (String) Any value. Changing it sets a new random password. For example, set it to the current month to rotate monthly.
+            username: (String) User name.
+        importStatements:
+            - |-
+              # Import a database as <game_server_id>/<database_id>. The password is not
+              # known after an import until rotation_trigger changes.
+              terraform import noderings_game_server_database.luckperms 00000000-0000-0000-0000-000000000000/abc123
+    noderings_game_server_schedule:
+        subCategory: Game Servers
+        description: A schedule that runs tasks on a game server at set times, for example a nightly restart or backup. Tasks run in the order they are written. Changing the server's game deletes all its schedules; Terraform then creates this one again. The game server must be ready.
+        name: noderings_game_server_schedule
+        title: noderings_game_server_schedule Resource - noderings
+        examples:
+            - name: nightly
+              manifest: |-
+                {
+                  "cron": {
+                    "hour": "4",
+                    "minute": "0"
+                  },
+                  "game_server_id": "${noderings_game_server.survival.id}",
+                  "name": "nightly restart",
+                  "only_when_online": true,
+                  "task": [
+                    {
+                      "action": "command",
+                      "payload": "say Restarting in 5 minutes"
+                    },
+                    {
+                      "action": "backup",
+                      "time_offset": 240
+                    },
+                    {
+                      "action": "power",
+                      "payload": "restart",
+                      "time_offset": 60
+                    }
+                  ]
+                }
+              references:
+                game_server_id: noderings_game_server.survival.id
+        argumentDocs:
+            action: (String) command (send a console command), power (start, stop, restart or kill) or backup (create a backup).
+            active: (Boolean) Whether the schedule runs. Defaults to true.
+            continue_on_failure: (Boolean) Run the next tasks even if this one fails. Defaults to false.
+            cron: (Attributes) When the schedule runs, in the server's time zone. (see below for nested schema)
+            day_of_month: (String) Day of the month. Cron syntax; defaults to *.
+            day_of_week: (String) Day of the week (0 or 7 is Sunday). Cron syntax; defaults to *.
+            game_server_id: (String) ID of the game server. Changing it replaces the resource.
+            hour: (String) Hour. Cron syntax; defaults to *.
+            id: (String) <game_server_id>/<object ID>, also the import ID.
+            last_run_at: (String) When the schedule last ran.
+            minute: (String) Minute. Cron syntax; defaults to *.
+            month: (String) Month. Cron syntax; defaults to *.
+            name: (String) Schedule name.
+            next_run_at: (String) When the schedule runs next.
+            only_when_online: (Boolean) Run only while the server is running. Defaults to false.
+            payload: (String) For command, the command to send. For power, one of start, stop, restart or kill. For backup, files to leave out of the backup, one pattern per line (optional).
+            schedule_id: (String) Schedule ID.
+            sequence_id: (Number) Position, starting at 1.
+            task: (Block List) A step of the schedule. Tasks run in the order written; time_offset delays a task after the previous one. (see below for nested schema)
+            time_offset: (Number) Seconds to wait after the previous task, 0 to 900. Defaults to 0.
+        importStatements:
+            - |-
+              # Import a schedule as <game_server_id>/<schedule_id>.
+              terraform import noderings_game_server_schedule.nightly 00000000-0000-0000-0000-000000000000/12
+    noderings_group:
+        subCategory: IAM
+        description: A group of users and service accounts. Manage its members with noderings_group_membership and its role with noderings_role_assignment.
+        name: noderings_group
+        title: noderings_group Resource - noderings
+        examples:
+            - name: ops
+              manifest: |-
+                {
+                  "description": "Operations team",
+                  "name": "ops"
+                }
+        argumentDocs:
+            created_at: (String) Creation time (RFC 3339).
+            description: (String) Description. The API cannot clear a description, so removing this argument keeps the current one.
+            id: (String) Group ID.
+            name: (String) Name, 3 to 255 characters, unique in the organization (case-insensitive).
+        importStatements:
+            - |-
+              # Import a group by its ID.
+              terraform import noderings_group.ops 00000000-0000-0000-0000-000000000000
+    noderings_group_membership:
+        subCategory: IAM
+        description: 'The members of one group. This resource is authoritative for each member type it sets: when user_ids is set, users not in it are removed from the group, and likewise for service_account_ids. A member type left unset is not managed. Use only one noderings_group_membership per group. Users must already belong to the organization (they join through invites). Find their IDs with the noderings_users data source.'
+        name: noderings_group_membership
+        title: noderings_group_membership Resource - noderings
+        examples:
+            - name: ops
+              manifest: |-
+                {
+                  "group_id": "${noderings_group.ops.id}",
+                  "service_account_ids": [
+                    "00000000-0000-0000-0000-000000000000"
+                  ],
+                  "user_ids": "${data.noderings_users.ops.ids}"
+                }
+              references:
+                group_id: noderings_group.ops.id
+                user_ids: data.noderings_users.ops.ids
+              dependencies:
+                noderings_group.ops: |-
+                    {
+                      "name": "ops"
+                    }
+        argumentDocs:
+            group_id: (String) ID of the group. Changing it replaces the resource.
+            id: (String) Same as group_id.
+            service_account_ids: (Set of String) IDs of the service accounts in the group. An empty set removes every service account.
+            user_ids: (Set of String) IDs of the users in the group. An empty set removes every user.
+        importStatements:
+            - |-
+              # Import the members of a group by the group's ID. Both users and service
+              # accounts become managed.
+              terraform import noderings_group_membership.ops 00000000-0000-0000-0000-000000000000
+    noderings_role:
+        subCategory: IAM
+        description: 'A custom role: a named set of permissions that can be given to users, groups and service accounts with noderings_role_assignment. Built-in roles (Owner, Administrator, Billing, Operator, Viewer) are read-only; look them up with the noderings_role data source.'
+        name: noderings_role
+        title: noderings_role Resource - noderings
+        examples:
+            - name: dns_admin
+              manifest: |-
+                {
+                  "description": "Manages DNS zones and records",
+                  "name": "dns-admin",
+                  "permission_ids": "${setunion(\n    data.noderings_permissions.dns.ids,\n    [data.noderings_permission.list_ssh_keys.id],\n  )}"
+                }
+        argumentDocs:
+            builtin: (Boolean) Always false for roles managed by this resource.
+            description: (String) Description. The API cannot clear a description, so removing this argument keeps the current one.
+            id: (String) Role ID.
+            name: (String) Name, 3 to 255 characters, unique in the organization (case-insensitive).
+            permission_ids: (Set of String) IDs of the permissions the role grants. Look them up with the noderings_permission or noderings_permissions data sources. Permissions added outside Terraform are removed on the next apply.
+        importStatements:
+            - |-
+              # Import a custom role by its ID or by its name. Built-in roles cannot be imported.
+              terraform import noderings_role.dns_admin 00000000-0000-0000-0000-000000000000
+              terraform import noderings_role.dns_admin dns-admin
+    noderings_role_assignment:
+        subCategory: IAM
+        description: Gives a user, group or service account its role in the organization. Each principal has exactly one direct role, so applying this resource replaces any role the principal had, and destroying it leaves the principal with no direct role. Use one assignment per principal.
+        name: noderings_role_assignment
+        title: noderings_role_assignment Resource - noderings
+        examples:
+            - name: ops
+              manifest: |-
+                {
+                  "group_id": "${noderings_group.ops.id}",
+                  "role_id": "${data.noderings_role.operator.id}"
+                }
+              references:
+                group_id: noderings_group.ops.id
+                role_id: data.noderings_role.operator.id
+              dependencies:
+                noderings_group.ops: |-
+                    {
+                      "name": "ops"
+                    }
+            - name: auditor
+              manifest: |-
+                {
+                  "role_id": "${data.noderings_role.viewer.id}",
+                  "user_id": "${data.noderings_users.auditor.ids[0]}"
+                }
+              references:
+                role_id: data.noderings_role.viewer.id
+                user_id: data.noderings_users.auditor.ids[0]
+              dependencies:
+                noderings_group.ops: |-
+                    {
+                      "name": "ops"
+                    }
+        argumentDocs:
+            group_id: (String) ID of the group that gets the role. Exactly one of user_id, group_id and service_account_id must be set. Changing it replaces the assignment.
+            id: (String) user/<id>, group/<id> or service_account/<id>.
+            role_id: (String) ID of the role, custom or built-in. Changing it switches the principal to the new role in place.
+            service_account_id: (String) ID of the service account that gets the role. Exactly one of user_id, group_id and service_account_id must be set. Changing it replaces the assignment.
+            user_id: (String) ID of the user that gets the role. Exactly one of user_id, group_id and service_account_id must be set. Changing it replaces the assignment.
+        importStatements:
+            - |-
+              # Import a principal's role assignment as <kind>/<id>, where kind is user,
+              # group or service_account.
+              terraform import noderings_role_assignment.ops group/00000000-0000-0000-0000-000000000000
+              terraform import noderings_role_assignment.auditor user/00000000-0000-0000-0000-000000000000
+    noderings_secret:
+        subCategory: IAM
+        description: An organization secret. The API never returns a secret's value, so Terraform cannot detect changes made to it outside Terraform. The value is stored in the Terraform state; protect the state accordingly.
+        name: noderings_secret
+        title: noderings_secret Resource - noderings
+        examples:
+            - name: registry_password
+              manifest: |-
+                {
+                  "key": "registry_password",
+                  "value": "${var.registry_password}"
+                }
+              references:
+                value: var.registry_password
+        argumentDocs:
+            created_at: (String) Creation time (RFC 3339).
+            id: (String) Secret ID.
+            key: '(String) Key: lower-case letters, digits, _ and -. Unique in the organization. Changing it replaces the secret.'
+            value: (String, Sensitive) Value, 1 to 255 characters. Changing it updates the secret in place.
+        importStatements:
+            - |-
+              # Import a secret by its ID. The API never returns the value, so the next
+              # apply writes the configured value.
+              terraform import noderings_secret.registry_password 00000000-0000-0000-0000-000000000000
+    noderings_ssh_key:
+        subCategory: IAM
+        description: An SSH public key that virtual machines can be created with. Keys cannot be changed in place; changing any argument replaces the key.
+        name: noderings_ssh_key
+        title: noderings_ssh_key Resource - noderings
+        examples:
+            - name: laptop
+              manifest: |-
+                {
+                  "name": "laptop",
+                  "public_key": "${file(\"~/.ssh/id_ed25519.pub\")}"
+                }
+        argumentDocs:
+            created_at: (String) Creation time (RFC 3339).
+            fingerprint: (String) SHA-256 fingerprint as reported by NodeRings.
+            id: (String) Key ID.
+            key_type: '(String) Key algorithm: ed25519, rsa, ecdsa or dsa.'
+            name: (String) Name, unique in the organization (case-insensitive).
+            public_key: (String) OpenSSH public key, for example the contents of ~/.ssh/id_ed25519.pub.
+        importStatements:
+            - |-
+              # Import an SSH key by its ID.
+              terraform import noderings_ssh_key.laptop 00000000-0000-0000-0000-000000000000
+    noderings_virtual_machine:
+        subCategory: Compute
+        description: 'A virtual machine ordered from a provider on the NodeRings marketplace. Billing: creating a VM starts a subscription for its plan. Destroying or replacing it cancels the subscription immediately with no refund for prepaid (monthly) plans; usage-billed VMs are charged for the final partial hour.'
+        name: noderings_virtual_machine
+        title: noderings_virtual_machine Resource - noderings
+        examples:
+            - name: web
+              manifest: |-
+                {
+                  "deletion_protection": true,
+                  "distro": "ubuntu_24_04",
+                  "hostname": "web-1",
+                  "plan_id": "${data.noderings_marketplace_offer.web.plan_id}",
+                  "power_state": "running",
+                  "region_id": "${data.noderings_marketplace_offer.web.region_id}",
+                  "ssh_key_ids": [
+                    "${data.noderings_ssh_key.me.id}"
+                  ],
+                  "tags": [
+                    "web",
+                    "prod"
+                  ],
+                  "timeouts": [
+                    {
+                      "create": "20m"
+                    }
+                  ]
+                }
+              references:
+                plan_id: data.noderings_marketplace_offer.web.plan_id
+                region_id: data.noderings_marketplace_offer.web.region_id
+                ssh_key_ids: data.noderings_ssh_key.me.id
+        argumentDocs:
+            additional_ipv4: (Attributes List) Additional IPv4 addresses. Manage them with noderings_virtual_machine_additional_ip. (see below for nested schema)
+            capabilities: (List of String) Features the platform supports, such as guest_firewall, on_demand_backup and snapshots.
+            compliance_held: (Boolean) Whether the VM is held for a compliance review. A held VM rejects most changes.
+            coupon_code: (String) Coupon to apply when ordering. Only used at create; later changes are ignored.
+            cpu: (Number) vCPUs.
+            create: (String) How long to wait for create, for example 30m.
+            created_at: (String) Creation time (RFC 3339).
+            delete: (String) How long to wait for delete, for example 30m.
+            deletion_protection: (Boolean) When true, Terraform refuses to delete the VM, including for a replacement. Defaults to false.
+            distro: (String) Operating system, one of ubuntu_22_04, ubuntu_24_04, ubuntu_26_04, debian_12, debian_13, fedora_43, fedora_44, centos_9, centos_10, rocky_9, rocky_10, almalinux_9, almalinux_10. See data.noderings_distros. Required unless instant_app_id is set; with an Instant App it defaults to the app's distro and must match it if set. Whether a provider has an image for a distro is only known at create. Changing it replaces the VM (a new VM, new IP addresses, a new subscription), or reinstalls it when reinstall_on_change = true.
+            firewall_ruleset_id: (String) Attached firewall ruleset, empty if none. Manage it with noderings_firewall_ruleset_attachment.
+            gateway: (String) Gateway.
+            has_active_backup: (Boolean) Whether the backup add-on is active. Manage it with noderings_virtual_machine_backup.
+            hostname: '(String) Hostname. Not unique: several VMs may share one. The platform also creates a firewall address group named after it, so don''t name your own address groups after VM hostnames. Changing it replaces the VM (a new VM, new IP addresses, a new subscription), or reinstalls it when reinstall_on_change = true.'
+            id: (String) VM ID.
+            instant_app_id: (String) Instant App to install, usually data.noderings_instant_app.<name>.id. Changing it replaces the VM (a new VM, new IP addresses, a new subscription), or reinstalls it when reinstall_on_change = true.
+            instant_app_slug: (String) Slug of the Instant App installed at create or reinstall, if any.
+            instant_app_variables: (Map of String, Sensitive) Settings for the Instant App. Unknown names are rejected; see the variables of data.noderings_instant_apps. The API does not return them, so after import write them in configuration. Changing it replaces the VM (a new VM, new IP addresses, a new subscription), or reinstalls it when reinstall_on_change = true.
+            ip_address: (String) IPv4 address.
+            ipv4: (String) Primary IPv4 address. On VirtFusion and SolusVM it can stay empty until the platform assigns one.
+            ipv6: (String) Primary IPv6 address, empty if the region has no IPv6.
+            memory_mib: (Number) Memory in MiB.
+            password: (String, Sensitive) Root password, at most 255 characters. Stored in the Terraform state. The API does not return it, so after import write it in configuration. Changing it replaces the VM (a new VM, new IP addresses, a new subscription), or reinstalls it when reinstall_on_change = true.
+            plan_billing_type: (String) usage (hourly), subscription (monthly) or free.
+            plan_code: (String) Platform plan code, for example SC-GC-2C-4G-80.
+            plan_id: '(String) Plan to order, usually data.noderings_marketplace_offer.<name>.plan_id. Changing it replaces the VM: there is no resize.'
+            platform_driver: '(String) Hypervisor platform: proxmox, virtfusion or solusvm.'
+            power_state: (String) running or stopped. Changes in place. If unset, Terraform does not manage the power state and only reports it. This is the requested state; the platform does not report the hypervisor's actual state.
+            prefix_length: (Number) Prefix length.
+            provider_name: (String) Name of the hosting provider.
+            provider_organization_id: (String) ID of the hosting provider.
+            provisioning_state: '(String) Provisioning state: pending, processing, applied (ready) or failed.'
+            region_city: (String) City of the region.
+            region_country: (String) Country of the region.
+            region_id: (String) Region of the plan, usually data.noderings_marketplace_offer.<name>.region_id. Changing it replaces the VM.
+            reinstall_on_change: (Boolean) When true, changes to hostname, distro, instant_app_id, instant_app_variables, ssh_key_ids or password reinstall the VM in place instead of replacing it. A reinstall keeps the VM, its IP addresses and subscription, but wipes the disk, deletes all snapshots and cancels the backup add-on. Defaults to false.
+            reinstall_status: '(String) State of the last reinstall: none, requested, deleting, provisioning, completed or failed.'
+            reinstalled_at: (String) Time of the last completed reinstall (RFC 3339).
+            ssh_key_ids: (Set of String) IDs of SSH keys (noderings_ssh_key) to install. Exactly one of ssh_key_ids and password is required. The API does not return them, so after import write them in configuration. Changing it replaces the VM (a new VM, new IP addresses, a new subscription), or reinstalls it when reinstall_on_change = true.
+            storage_mib: (Number) Disk size in MiB.
+            tags: (Set of String) Tags. Firewall rules can select VMs by tag. Changes in place. Tags starting with tf-create- are reserved.
+            timeouts: (Block, Optional) How long to wait for operations to finish. (see below for nested schema)
+            update: (String) How long to wait for update, for example 30m.
+        importStatements:
+            - |-
+              # Import a virtual machine by its ID. The API does not return ssh_key_ids,
+              # password, instant_app_variables or coupon_code: keep them in the
+              # configuration. Filling them in after an import does not replace the VM.
+              terraform import noderings_virtual_machine.web 00000000-0000-0000-0000-000000000000
+    noderings_virtual_machine_additional_ip:
+        subCategory: Compute
+        description: 'One extra IPv4 address for a virtual machine, from the same network as its primary address. A VM can have at most 10. Billing: each address is a paid add-on. VMs on a monthly plan are charged a prorated amount when the address is added. Destroying this resource releases the address immediately; you may not get the same address back.'
+        name: noderings_virtual_machine_additional_ip
+        title: noderings_virtual_machine_additional_ip Resource - noderings
+        examples:
+            - name: web
+              manifest: |-
+                {
+                  "count": 2,
+                  "virtual_machine_id": "${noderings_virtual_machine.web.id}"
+                }
+              references:
+                virtual_machine_id: noderings_virtual_machine.web.id
+        argumentDocs:
+            currency: (String) Currency of the prices.
+            gateway: (String) Gateway.
+            id: (String) <virtual_machine_id>/<ip_address>.
+            ip_address: (String) The address.
+            monthly_unit_price: (String) Monthly price of the address, as a decimal string. Only known for addresses created by Terraform.
+            prefix_length: (Number) Prefix length of the network.
+            prorated_charge_amount: (String) Amount charged when the address was added. Only known for addresses created by Terraform.
+            virtual_machine_id: (String) ID of the virtual machine. Changing it replaces this resource.
+        importStatements:
+            - |-
+              # Import an additional IP address as <virtual_machine_id>/<ip_address>.
+              terraform import 'noderings_virtual_machine_additional_ip.web[0]' 00000000-0000-0000-0000-000000000000/192.0.2.10
+    noderings_virtual_machine_backup:
+        subCategory: Compute
+        description: 'Turns on the paid backup add-on for a virtual machine. The platform then takes backups on its schedule, starting with one right away; list them with data.noderings_virtual_machine_backups. Only platforms with the on_demand_backup capability (Proxmox) support backups. Billing: the add-on is charged on the VM''s subscription. Destroying this resource cancels the add-on immediately and deletes all of the VM''s backups. Reinstalling the VM also cancels it. If the add-on is already active when this resource is created, it is adopted without enabling it again.'
+        name: noderings_virtual_machine_backup
+        title: noderings_virtual_machine_backup Resource - noderings
+        examples:
+            - name: web
+              manifest: |-
+                {
+                  "addon_id": "${data.noderings_marketplace_addon.backup.id}",
+                  "virtual_machine_id": "${noderings_virtual_machine.web.id}"
+                }
+              references:
+                addon_id: data.noderings_marketplace_addon.backup.id
+                virtual_machine_id: noderings_virtual_machine.web.id
+        argumentDocs:
+            addon_id: (String) Backup add-on, usually data.noderings_marketplace_addon.<name>.id. Changing it switches add-on in place; the old one is cancelled.
+            addon_status: (String) Add-on status, active while backups are on.
+            addon_subscription_id: (String) ID of the add-on subscription.
+            id: (String) Same as virtual_machine_id.
+            virtual_machine_id: (String) ID of the virtual machine. Changing it replaces this resource.
+        importStatements:
+            - |-
+              # Import the backup add-on of a virtual machine by the VM's ID.
+              terraform import noderings_virtual_machine_backup.web 00000000-0000-0000-0000-000000000000
+    noderings_virtual_machine_snapshot:
+        subCategory: Compute
+        description: Experimental. A snapshot of a virtual machine's disk. The NodeRings console does not show snapshots yet, so this resource may change in a later release. Only platforms with the snapshots capability (Proxmox) support snapshots. Reinstalling or deleting the VM deletes its snapshots. Restoring a snapshot is not managed by Terraform.
+        name: noderings_virtual_machine_snapshot
+        title: noderings_virtual_machine_snapshot Resource - noderings
+        examples:
+            - name: before_upgrade
+              manifest: |-
+                {
+                  "description": "Before the 2.0 upgrade",
+                  "virtual_machine_id": "${noderings_virtual_machine.web.id}"
+                }
+              references:
+                virtual_machine_id: noderings_virtual_machine.web.id
+        argumentDocs:
+            create: (String) How long to wait for create, for example 30m.
+            created_at: (String) Creation time (RFC 3339).
+            description: (String) Description. Changing it replaces the snapshot.
+            id: (String) <virtual_machine_id>/<snapshot_id>.
+            name: (String) Name the platform gave the snapshot.
+            operation_status: (String) completed once the snapshot is taken, or failed.
+            snapshot_id: (String) Snapshot ID.
+            status: (String) active until the snapshot is deleted or expires.
+            timeouts: (Block, Optional) How long to wait for operations to finish. (see below for nested schema)
+            virtual_machine_id: (String) ID of the virtual machine. Changing it replaces the snapshot.
+        importStatements:
+            - |-
+              # Import a snapshot as <virtual_machine_id>/<snapshot_id>.
+              terraform import noderings_virtual_machine_snapshot.before_upgrade 00000000-0000-0000-0000-000000000000/11111111-1111-1111-1111-111111111111

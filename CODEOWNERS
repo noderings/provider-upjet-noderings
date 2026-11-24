@@ -1,0 +1,4 @@
+# Automatic reviewer assignment. Every pull request needs approval from at
+# least one maintainer listed in OWNERS.md.
+
+*	@shaygun

@@ -1,0 +1,82 @@
+# An hourly VM with an SSH key and a firewall. BILLED: it orders a real server
+# for the length of the test (cents per run).
+#
+# planId and regionId pick the offer. Find them with the NodeRings console,
+# the API (ListMarketplaceOfferings), `nr` CLI, or the Terraform
+# noderings_marketplace_offer data source. The test reads them from the uptest
+# data source (${data.planId}, ${data.regionId}).
+apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+kind: SSHKey
+metadata:
+  name: laptop
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: compute/v1alpha1/virtualmachine
+  labels:
+    testing.upbound.io/example-name: laptop
+spec:
+  forProvider:
+    name: laptop-${Rand.RFC1123Subdomain}
+    publicKey: ${data.sshPublicKey}
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
+---
+apiVersion: compute.noderings.m.crossplane.io/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: web
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: compute/v1alpha1/virtualmachine
+    uptest.upbound.io/timeout: "1800"
+  labels:
+    testing.upbound.io/example-name: web
+spec:
+  forProvider:
+    hostname: web-${Rand.RFC1123Subdomain}
+    planId: ${data.planId}
+    regionId: ${data.regionId}
+    distro: ubuntu_24_04
+    sshKeyIdsRefs:
+      - name: laptop
+    tags:
+      - crossplane-test
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
+---
+apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+kind: Ruleset
+metadata:
+  name: vm-web
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: compute/v1alpha1/virtualmachine
+  labels:
+    testing.upbound.io/example-name: vm-web
+spec:
+  forProvider:
+    name: vm-web-${Rand.RFC1123Subdomain}
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
+---
+apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+kind: RulesetAttachment
+metadata:
+  name: web
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: compute/v1alpha1/virtualmachine
+spec:
+  forProvider:
+    virtualMachineIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: web
+    rulesetIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: vm-web
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default

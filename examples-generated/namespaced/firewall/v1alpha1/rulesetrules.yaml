@@ -1,0 +1,81 @@
+apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+kind: RulesetRules
+metadata:
+  annotations:
+    meta.upbound.io/example-id: firewall/v1alpha1/rulesetrules
+  labels:
+    testing.upbound.io/example-name: web
+  name: web
+  namespace: default
+spec:
+  forProvider:
+    rule:
+    - action: accept
+      destinationPorts: "443"
+      direction: ingress
+      protocol: tcp
+      source:
+      - cidrs:
+        - 0.0.0.0/0
+    - action: accept
+      destinationPorts: "443"
+      direction: ingress
+      protocol: tcp
+      source:
+      - cidrs:
+        - ::/0
+    - action: accept
+      destinationPorts: "22"
+      direction: ingress
+      protocol: tcp
+      source:
+      - addressGroupIdsRefs:
+        - name: office
+    - action: drop
+      direction: ingress
+      protocol: any
+      source:
+      - cidrs:
+        - 0.0.0.0/0
+    - action: drop
+      direction: ingress
+      protocol: any
+      source:
+      - cidrs:
+        - ::/0
+    rulesetIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: web
+
+---
+
+apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+kind: AddressGroup
+metadata:
+  annotations:
+    meta.upbound.io/example-id: firewall/v1alpha1/rulesetrules
+  labels:
+    testing.upbound.io/example-name: office
+  name: office
+  namespace: default
+spec:
+  forProvider:
+    cidrs:
+    - 203.0.113.0/24
+    - 2001:db8:10::/48
+    name: office-networks
+
+---
+
+apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+kind: Ruleset
+metadata:
+  annotations:
+    meta.upbound.io/example-id: firewall/v1alpha1/rulesetrules
+  labels:
+    testing.upbound.io/example-name: web
+  name: web
+  namespace: default
+spec:
+  forProvider:
+    name: web

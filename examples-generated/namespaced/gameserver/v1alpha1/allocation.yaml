@@ -1,0 +1,15 @@
+apiVersion: gameserver.noderings.m.crossplane.io/v1alpha1
+kind: Allocation
+metadata:
+  annotations:
+    meta.upbound.io/example-id: gameserver/v1alpha1/allocation
+  labels:
+    testing.upbound.io/example-name: query
+  name: query
+  namespace: default
+spec:
+  forProvider:
+    gameServerIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: survival
+    notes: query port

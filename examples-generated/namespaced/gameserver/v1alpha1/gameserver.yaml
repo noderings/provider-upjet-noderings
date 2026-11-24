@@ -1,0 +1,22 @@
+apiVersion: gameserver.noderings.m.crossplane.io/v1alpha1
+kind: GameServer
+metadata:
+  annotations:
+    meta.upbound.io/example-id: gameserver/v1alpha1/gameserver
+  labels:
+    testing.upbound.io/example-name: survival
+  name: survival
+  namespace: default
+spec:
+  forProvider:
+    acceptEula: true
+    deletionProtection: true
+    environment:
+      MAX_PLAYERS: "30"
+      MINECRAFT_VERSION: 1.21.4
+    name: survival
+    planId: ${var.plan_id}
+    powerState: running
+    templateId: ${data.noderings_game_server_games.paper.id}
+    timeouts:
+    - create: 45m

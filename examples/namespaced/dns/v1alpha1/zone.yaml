@@ -1,0 +1,79 @@
+# A DNS zone with an A record, a GeoDNS record and DNSSEC signing. Free.
+# Zone names are random per test run; use your own domain in real use.
+apiVersion: dns.noderings.m.crossplane.io/v1alpha1
+kind: Zone
+metadata:
+  name: example
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: dns/v1alpha1/zone
+    uptest.upbound.io/timeout: "600"
+  labels:
+    testing.upbound.io/example-name: example
+spec:
+  forProvider:
+    name: ${Rand.RFC1123Subdomain}.example.com
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
+---
+apiVersion: dns.noderings.m.crossplane.io/v1alpha1
+kind: Record
+metadata:
+  name: www
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: dns/v1alpha1/zone
+spec:
+  forProvider:
+    zoneIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    name: www
+    type: A
+    ttl: 300
+    records:
+      - 192.0.2.10
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
+---
+apiVersion: dns.noderings.m.crossplane.io/v1alpha1
+kind: GeoRecord
+metadata:
+  name: app
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: dns/v1alpha1/zone
+spec:
+  forProvider:
+    zoneIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    name: app
+    type: A
+    ttl: 60
+    default: 192.0.2.10
+    continents:
+      EU: 198.51.100.10
+    countries:
+      JP: 203.0.113.10
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
+---
+apiVersion: dns.noderings.m.crossplane.io/v1alpha1
+kind: ZoneDNSSEC
+metadata:
+  name: example
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: dns/v1alpha1/zone
+spec:
+  forProvider:
+    zoneIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default

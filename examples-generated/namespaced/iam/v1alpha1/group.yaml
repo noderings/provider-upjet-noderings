@@ -1,0 +1,13 @@
+apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+kind: Group
+metadata:
+  annotations:
+    meta.upbound.io/example-id: iam/v1alpha1/group
+  labels:
+    testing.upbound.io/example-name: ops
+  name: ops
+  namespace: default
+spec:
+  forProvider:
+    description: Operations team
+    name: ops

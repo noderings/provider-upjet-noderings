@@ -1,0 +1,22 @@
+apiVersion: meta.pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-upjet-noderings
+  annotations:
+    meta.crossplane.io/maintainer: NodeRings <partners@noderings.com>
+    meta.crossplane.io/source: github.com/noderings/provider-upjet-noderings
+    meta.crossplane.io/license: Apache-2.0
+    meta.crossplane.io/description: |
+      Crossplane provider for NodeRings: order virtual machines and manage DNS,
+      firewalls, game servers and access control on the NodeRings cloud marketplace.
+    meta.crossplane.io/readme: |
+      Manage NodeRings resources from Kubernetes. Create a Secret with a NodeRings
+      service account token, point a ClusterProviderConfig at it, and apply
+      VirtualMachine, Zone, Record, Ruleset and other resources. Documentation:
+      https://github.com/noderings/provider-upjet-noderings
+    friendly-name.meta.crossplane.io: Provider NodeRings
+spec:
+  capabilities:
+    - SafeStart
+  crossplane:
+    version: ">=v2.0.0-0"

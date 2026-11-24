@@ -1,0 +1,72 @@
+# A firewall ruleset for a web server: SSH from an address group, HTTPS from
+# anywhere, everything else dropped. Free until attached to a VM.
+apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+kind: AddressGroup
+metadata:
+  name: office
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: firewall/v1alpha1/ruleset
+  labels:
+    testing.upbound.io/example-name: office
+spec:
+  forProvider:
+    name: office-${Rand.RFC1123Subdomain}
+    cidrs:
+      - 198.51.100.0/24
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
+---
+apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+kind: Ruleset
+metadata:
+  name: web
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: firewall/v1alpha1/ruleset
+  labels:
+    testing.upbound.io/example-name: web
+spec:
+  forProvider:
+    name: web-${Rand.RFC1123Subdomain}
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
+---
+apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+kind: RulesetRules
+metadata:
+  name: web
+  namespace: default
+  annotations:
+    meta.upbound.io/example-id: firewall/v1alpha1/ruleset
+spec:
+  forProvider:
+    rulesetIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: web
+    rule:
+      - direction: ingress
+        action: accept
+        protocol: tcp
+        destinationPorts: "22"
+        source:
+          addressGroupIdsRefs:
+            - name: office
+      - direction: ingress
+        action: accept
+        protocol: tcp
+        destinationPorts: "443"
+        source:
+          cidrs:
+            - 0.0.0.0/0
+      - direction: ingress
+        action: drop
+        protocol: any
+        source:
+          cidrs:
+            - 0.0.0.0/0
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default

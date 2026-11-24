@@ -1,0 +1,16 @@
+apiVersion: gameserver.noderings.m.crossplane.io/v1alpha1
+kind: Backup
+metadata:
+  annotations:
+    meta.upbound.io/example-id: gameserver/v1alpha1/backup
+  labels:
+    testing.upbound.io/example-name: before_upgrade
+  name: before-upgrade
+  namespace: default
+spec:
+  forProvider:
+    gameServerIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: survival
+    locked: true
+    name: before 1.21 upgrade
