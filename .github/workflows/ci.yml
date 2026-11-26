@@ -20,7 +20,8 @@ env:
 
 jobs:
   detect-noop:
-    runs-on: ubuntu-24.04
+    # Pushes to main run on the org runner; pull requests and everything else stay GitHub-hosted.
+    runs-on: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && fromJSON('["self-hosted","linux","x64"]') || 'ubuntu-24.04' }}
     outputs:
       noop: ${{ steps.noop.outputs.should_skip }}
     steps:
@@ -33,7 +34,8 @@ jobs:
           do_not_skip: '["workflow_dispatch", "schedule", "push"]'
 
   report-breaking-changes:
-    runs-on: ubuntu-24.04
+    # Pushes to main run on the org runner; pull requests and everything else stay GitHub-hosted.
+    runs-on: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && fromJSON('["self-hosted","linux","x64"]') || 'ubuntu-24.04' }}
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
     steps:
@@ -61,7 +63,8 @@ jobs:
 
 
   lint:
-    runs-on: ubuntu-24.04
+    # Pushes to main run on the org runner; pull requests and everything else stay GitHub-hosted.
+    runs-on: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && fromJSON('["self-hosted","linux","x64"]') || 'ubuntu-24.04' }}
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
 
@@ -105,7 +108,8 @@ jobs:
           version: ${{ env.GOLANGCI_VERSION }}
 
   check-diff:
-    runs-on: ubuntu-24.04
+    # Pushes to main run on the org runner; pull requests and everything else stay GitHub-hosted.
+    runs-on: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && fromJSON('["self-hosted","linux","x64"]') || 'ubuntu-24.04' }}
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
 
@@ -148,7 +152,8 @@ jobs:
         run: make check-diff
 
   unit-tests:
-    runs-on: ubuntu-24.04
+    # Pushes to main run on the org runner; pull requests and everything else stay GitHub-hosted.
+    runs-on: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && fromJSON('["self-hosted","linux","x64"]') || 'ubuntu-24.04' }}
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
 
@@ -197,7 +202,8 @@ jobs:
           files: _output/tests/linux_amd64/coverage.txt
 
   local-deploy:
-    runs-on: ubuntu-24.04
+    # Pushes to main run on the org runner; pull requests and everything else stay GitHub-hosted.
+    runs-on: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && fromJSON('["self-hosted","linux","x64"]') || 'ubuntu-24.04' }}
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
 
@@ -240,7 +246,8 @@ jobs:
         run: make local-deploy
 
   publish-artifacts:
-    runs-on: ubuntu-24.04
+    # Pushes to main run on the org runner; pull requests and everything else stay GitHub-hosted.
+    runs-on: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && fromJSON('["self-hosted","linux","x64"]') || 'ubuntu-24.04' }}
     needs:
       - detect-noop
       - report-breaking-changes
