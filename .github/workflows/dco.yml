@@ -25,7 +25,8 @@ jobs:
             author=$(git log -1 --format='%ae' "$c")
             # Release pull requests and dependency updates are made by bots.
             case "$author" in *"[bot]@users.noreply.github.com") continue ;; esac
-            if ! git log -1 --format='%B' "$c" | grep -qiE "^Signed-off-by: .+ <${author}>$"; then
+            # Fixed-string match: addresses such as 123+name@users.noreply.github.com contain regex characters.
+            if ! git log -1 --format='%B' "$c" | grep -i '^Signed-off-by: ' | grep -qiF "<${author}>"; then
               echo "::error::Commit $(git log -1 --format='%h %s' "$c") has no Signed-off-by line for ${author}"
               missing=1
             fi
