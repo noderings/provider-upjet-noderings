@@ -23,6 +23,8 @@ jobs:
           missing=0
           for c in $(git rev-list --no-merges "$BASE..$HEAD"); do
             author=$(git log -1 --format='%ae' "$c")
+            # Release pull requests and dependency updates are made by bots.
+            case "$author" in *"[bot]@users.noreply.github.com") continue ;; esac
             if ! git log -1 --format='%B' "$c" | grep -qiE "^Signed-off-by: .+ <${author}>$"; then
               echo "::error::Commit $(git log -1 --format='%h %s' "$c") has no Signed-off-by line for ${author}"
               missing=1

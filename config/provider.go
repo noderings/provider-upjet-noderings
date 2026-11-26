@@ -20,11 +20,11 @@ const (
 	modulePath     = "github.com/noderings/provider-upjet-noderings"
 
 	// RootGroup is the API group root of cluster-scoped resources, for
-	// example dns.noderings.crossplane.io.
-	RootGroup = "noderings.crossplane.io"
+	// example dns.noderings.com.
+	RootGroup = "noderings.com"
 	// RootGroupNamespaced is the API group root of namespaced resources, for
-	// example dns.noderings.m.crossplane.io.
-	RootGroupNamespaced = "noderings.m.crossplane.io"
+	// example dns.m.noderings.com.
+	RootGroupNamespaced = "m.noderings.com"
 )
 
 //go:embed schema.json

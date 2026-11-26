@@ -1,4 +1,4 @@
-apiVersion: compute.noderings.crossplane.io/v1alpha1
+apiVersion: compute.noderings.com/v1alpha1
 kind: VirtualMachineSnapshot
 metadata:
   annotations:

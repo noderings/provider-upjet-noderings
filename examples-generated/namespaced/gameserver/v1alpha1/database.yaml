@@ -1,4 +1,4 @@
-apiVersion: gameserver.noderings.m.crossplane.io/v1alpha1
+apiVersion: gameserver.m.noderings.com/v1alpha1
 kind: Database
 metadata:
   annotations:

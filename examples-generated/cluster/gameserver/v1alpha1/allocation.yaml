@@ -1,4 +1,4 @@
-apiVersion: gameserver.noderings.crossplane.io/v1alpha1
+apiVersion: gameserver.noderings.com/v1alpha1
 kind: Allocation
 metadata:
   annotations:

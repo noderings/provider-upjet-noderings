@@ -3,4 +3,6 @@ kind: Provider
 metadata:
   name: provider-upjet-noderings
 spec:
-  package: xpkg.upbound.io/noderings/provider-upjet-noderings:v0.1.0
+  # x-release-please-start-version
+  package: ghcr.io/noderings/provider-upjet-noderings:v0.1.0
+  # x-release-please-end

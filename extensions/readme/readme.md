@@ -1,24 +1,27 @@
 # Provider NodeRings
 
-
-`provider-upjet-noderings` is a [Crossplane](https://crossplane.io) provider for [NodeRings](https://noderings.com), a cloud marketplace where independent hosting providers sell virtual machines and game servers through one account and one API.
+`provider-upjet-noderings` is a [Crossplane](https://crossplane.io) provider for [NodeRings](https://noderings.com). NodeRings is an infrastructure marketplace: independent hosting providers sell compute, GPU, storage, network and more, and you buy and manage them through one account and one API.
 
 With it, you manage NodeRings from Kubernetes: apply a `VirtualMachine`, `Zone`, `Record` or `Ruleset`, and the provider creates the real resource, keeps it in the state you declared, and deletes it when you delete the object.
 
 It is built with [Upjet](https://github.com/crossplane/upjet) from the [NodeRings Terraform provider](https://github.com/noderings/terraform-provider-noderings), which is compiled into the provider. No Terraform binary runs in your cluster.
 
+New to it? The step-by-step guide [How to use Crossplane on NodeRings to order a VPS](https://noderings.com/blog/crossplane-vps) walks through a first run.
+
 ## Install
 
 You need Crossplane v2 or newer.
 
+<!-- x-release-please-start-version -->
 ```yaml
 apiVersion: pkg.crossplane.io/v1
 kind: Provider
 metadata:
   name: provider-upjet-noderings
 spec:
-  package: xpkg.upbound.io/noderings/provider-upjet-noderings:v0.1.0
+  package: ghcr.io/noderings/provider-upjet-noderings:v0.1.0
 ```
+<!-- x-release-please-end -->
 
 ```bash
 kubectl apply -f examples/install.yaml
@@ -27,9 +30,13 @@ kubectl get providers.pkg.crossplane.io provider-upjet-noderings
 
 Or with the Crossplane CLI:
 
+<!-- x-release-please-start-version -->
 ```bash
-crossplane xpkg install provider xpkg.upbound.io/noderings/provider-upjet-noderings:v0.1.0
+crossplane xpkg install provider ghcr.io/noderings/provider-upjet-noderings:v0.1.0
 ```
+<!-- x-release-please-end -->
+
+Every release is built for `linux/amd64` and `linux/arm64`.
 
 ## Configure credentials
 
@@ -47,7 +54,7 @@ crossplane xpkg install provider xpkg.upbound.io/noderings/provider-upjet-noderi
 3. Point a `ClusterProviderConfig` at it. Namespaced resources use this by default:
 
    ```yaml
-   apiVersion: noderings.m.crossplane.io/v1beta1
+   apiVersion: m.noderings.com/v1beta1
    kind: ClusterProviderConfig
    metadata:
      name: default
@@ -60,14 +67,14 @@ crossplane xpkg install provider xpkg.upbound.io/noderings/provider-upjet-noderi
          key: credentials
    ```
 
-   To give one namespace its own credentials, create a namespaced `ProviderConfig` (`noderings.m.crossplane.io/v1beta1`) in that namespace and reference it with `providerConfigRef: {kind: ProviderConfig, name: ...}`.
+   To give one namespace its own credentials, create a namespaced `ProviderConfig` (`m.noderings.com/v1beta1`) in that namespace and reference it with `providerConfigRef: {kind: ProviderConfig, name: ...}`.
 
 ## Create resources
 
 A DNS zone and a record that points at it. Both are free:
 
 ```yaml
-apiVersion: dns.noderings.m.crossplane.io/v1alpha1
+apiVersion: dns.m.noderings.com/v1alpha1
 kind: Zone
 metadata:
   name: example
@@ -76,7 +83,7 @@ spec:
   forProvider:
     name: example.com
 ---
-apiVersion: dns.noderings.m.crossplane.io/v1alpha1
+apiVersion: dns.m.noderings.com/v1alpha1
 kind: Record
 metadata:
   name: www
@@ -94,7 +101,7 @@ spec:
 
 ```bash
 kubectl apply -f zone.yaml
-kubectl get zones.dns.noderings.m.crossplane.io,records.dns.noderings.m.crossplane.io -n default
+kubectl get zones.dns.m.noderings.com,records.dns.m.noderings.com -n default
 kubectl get zone example -n default -o jsonpath='{.status.atProvider.nameservers}'
 ```
 
@@ -120,17 +127,16 @@ Changing `hostname`, `distro` or `sshKeyIds` replaces the server (new IP, empty 
 
 ## Resources
 
-Every resource exists twice: namespaced (`<group>.noderings.m.crossplane.io`, recommended for Crossplane v2) and cluster-scoped (`<group>.noderings.crossplane.io`).
+Every resource exists twice: namespaced (`<group>.m.noderings.com`, recommended for Crossplane v2) and cluster-scoped (`<group>.noderings.com`).
 
 | Group | Kinds |
 |---|---|
 | `compute` | `VirtualMachine`, `VirtualMachineBackup`, `VirtualMachineSnapshot`, `VirtualMachineAdditionalIP` |
 | `dns` | `Zone`, `Record`, `GeoRecord`, `ZoneDNSSEC` |
 | `firewall` | `Ruleset`, `RulesetRules`, `RulesetAttachment`, `AddressGroup` |
-| `gameserver` | `GameServer`, `Allocation`, `Backup`, `Database`, `Schedule` |
 | `iam` | `SSHKey`, `Role`, `RoleAssignment`, `Group`, `GroupMembership`, `Secret`, `EnvironmentVariable` |
 
-The full API reference, with every field documented, is on the [Upbound Marketplace](https://marketplace.upbound.io/providers/noderings/provider-upjet-noderings/) and in [`package/crds`](package/crds).
+Every field is documented in the CRDs in [`package/crds`](package/crds), which `kubectl explain` also reads.
 
 ### Adopt existing resources
 
@@ -141,7 +147,6 @@ Set the `crossplane.io/external-name` annotation to the resource's ID and the pr
 | `Record`, `GeoRecord` | `<zone id>/<name>/<type>`, for example `<zone id>/www/A` |
 | `VirtualMachineSnapshot` | `<vm id>/<snapshot id>` |
 | `VirtualMachineAdditionalIP` | `<vm id>/<ip address>` |
-| `Allocation`, `Backup`, `Database`, `Schedule` | `<game server id>/<id>` |
 | `RoleAssignment` | `<user, group or service_account>/<principal id>` |
 | everything else | the NodeRings ID |
 

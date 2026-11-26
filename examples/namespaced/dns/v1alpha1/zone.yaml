@@ -1,6 +1,6 @@
 # A DNS zone with an A record, a GeoDNS record and DNSSEC signing. Free.
 # Zone names are random per test run; use your own domain in real use.
-apiVersion: dns.noderings.m.crossplane.io/v1alpha1
+apiVersion: dns.m.noderings.com/v1alpha1
 kind: Zone
 metadata:
   name: example
@@ -17,7 +17,7 @@ spec:
     kind: ClusterProviderConfig
     name: default
 ---
-apiVersion: dns.noderings.m.crossplane.io/v1alpha1
+apiVersion: dns.m.noderings.com/v1alpha1
 kind: Record
 metadata:
   name: www
@@ -38,7 +38,7 @@ spec:
     kind: ClusterProviderConfig
     name: default
 ---
-apiVersion: dns.noderings.m.crossplane.io/v1alpha1
+apiVersion: dns.m.noderings.com/v1alpha1
 kind: GeoRecord
 metadata:
   name: app
@@ -62,7 +62,7 @@ spec:
     kind: ClusterProviderConfig
     name: default
 ---
-apiVersion: dns.noderings.m.crossplane.io/v1alpha1
+apiVersion: dns.m.noderings.com/v1alpha1
 kind: ZoneDNSSEC
 metadata:
   name: example
