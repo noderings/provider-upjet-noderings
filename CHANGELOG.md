@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/noderings/provider-upjet-noderings/compare/v0.1.0...v0.2.0) (2026-11-26)
+
+
+### Features
+
+* add Artifact Hub OCI annotations to published images ([#8](https://github.com/noderings/provider-upjet-noderings/issues/8)) ([85608b6](https://github.com/noderings/provider-upjet-noderings/commit/85608b671c93ec619368fd622f3d49e14cb09a74))
+
 ## 0.1.0 (2026-11-26)
 
 First release, generated with Upjet from the NodeRings Terraform provider v0.1.1.
