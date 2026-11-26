@@ -2,13 +2,12 @@
 
 ## 0.1.0 (2026-11-26)
 
+First release, generated with Upjet from the NodeRings Terraform provider v0.1.1.
 
 ### Features
 
 * first release of the NodeRings Crossplane provider ([#1](https://github.com/noderings/provider-upjet-noderings/issues/1)) ([487c230](https://github.com/noderings/provider-upjet-noderings/commit/487c2308bfa21679ff1bb6438044916d214fa3f4))
-
-## Changelog
-
-All notable changes to this project are documented in this file. Releases are
-made by [release-please](https://github.com/googleapis/release-please) from
-[Conventional Commits](https://www.conventionalcommits.org/).
+* 24 managed resources, each namespaced (`<group>.m.noderings.com`) and cluster-scoped (`<group>.noderings.com`), including `VirtualMachine`, `Zone`, `Record`, `Ruleset`, `SSHKey` and `Role`
+* cross-resource references (`...Ref` and `...Selector`) for every ID field
+* the Terraform provider runs in-process, so no Terraform binary runs in the cluster
+* package for `linux/amd64` and `linux/arm64` at `ghcr.io/noderings/provider-upjet-noderings`
