@@ -10,7 +10,7 @@ import (
 
 // Package type metadata.
 const (
-	Group   = "noderings.m.crossplane.io"
+	Group   = "m.noderings.com"
 	Version = "v1beta1"
 )
 

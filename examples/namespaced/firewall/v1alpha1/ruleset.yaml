@@ -1,6 +1,6 @@
 # A firewall ruleset for a web server: SSH from an address group, HTTPS from
 # anywhere, everything else dropped. Free until attached to a VM.
-apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+apiVersion: firewall.m.noderings.com/v1alpha1
 kind: AddressGroup
 metadata:
   name: office
@@ -18,7 +18,7 @@ spec:
     kind: ClusterProviderConfig
     name: default
 ---
-apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+apiVersion: firewall.m.noderings.com/v1alpha1
 kind: Ruleset
 metadata:
   name: web
@@ -34,7 +34,7 @@ spec:
     kind: ClusterProviderConfig
     name: default
 ---
-apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+apiVersion: firewall.m.noderings.com/v1alpha1
 kind: RulesetRules
 metadata:
   name: web

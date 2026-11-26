@@ -1,4 +1,4 @@
-apiVersion: compute.noderings.m.crossplane.io/v1alpha1
+apiVersion: compute.m.noderings.com/v1alpha1
 kind: VirtualMachineBackup
 metadata:
   annotations:

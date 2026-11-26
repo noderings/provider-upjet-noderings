@@ -1,4 +1,4 @@
-apiVersion: firewall.noderings.crossplane.io/v1alpha1
+apiVersion: firewall.noderings.com/v1alpha1
 kind: RulesetRules
 metadata:
   annotations:
@@ -48,7 +48,7 @@ spec:
 
 ---
 
-apiVersion: firewall.noderings.crossplane.io/v1alpha1
+apiVersion: firewall.noderings.com/v1alpha1
 kind: AddressGroup
 metadata:
   annotations:
@@ -65,7 +65,7 @@ spec:
 
 ---
 
-apiVersion: firewall.noderings.crossplane.io/v1alpha1
+apiVersion: firewall.noderings.com/v1alpha1
 kind: Ruleset
 metadata:
   annotations:

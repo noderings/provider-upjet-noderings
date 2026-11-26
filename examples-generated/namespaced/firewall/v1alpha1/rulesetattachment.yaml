@@ -1,4 +1,4 @@
-apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+apiVersion: firewall.m.noderings.com/v1alpha1
 kind: RulesetAttachment
 metadata:
   annotations:

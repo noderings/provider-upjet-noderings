@@ -1,6 +1,6 @@
 # A custom role that can list SSH keys, a group, and the role assigned to the
 # group. Free.
-apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+apiVersion: iam.m.noderings.com/v1alpha1
 kind: Role
 metadata:
   name: ssh-key-reader
@@ -20,7 +20,7 @@ spec:
     kind: ClusterProviderConfig
     name: default
 ---
-apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+apiVersion: iam.m.noderings.com/v1alpha1
 kind: Group
 metadata:
   name: ops
@@ -36,7 +36,7 @@ spec:
     kind: ClusterProviderConfig
     name: default
 ---
-apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+apiVersion: iam.m.noderings.com/v1alpha1
 kind: RoleAssignment
 metadata:
   name: ops-ssh-key-reader

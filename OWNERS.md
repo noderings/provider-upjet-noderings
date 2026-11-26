@@ -4,6 +4,6 @@ This page lists the maintainers of this repository.
 
 ## Maintainers
 
-* Shaygun <partners@noderings.com> ([shaygun](https://github.com/shaygun)), NodeRings
+* NodeRings Team <partners@noderings.com> ([@shaygun](https://github.com/shaygun))
 
 See [CODEOWNERS](./CODEOWNERS) for automatic pull request assignment.

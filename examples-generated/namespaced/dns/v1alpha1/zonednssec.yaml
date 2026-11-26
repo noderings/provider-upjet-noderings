@@ -1,4 +1,4 @@
-apiVersion: dns.noderings.m.crossplane.io/v1alpha1
+apiVersion: dns.m.noderings.com/v1alpha1
 kind: ZoneDNSSEC
 metadata:
   annotations:

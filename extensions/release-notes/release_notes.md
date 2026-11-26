@@ -1,3 +1,3 @@
-# v0.1.0
+# Release notes
 
-First release: 24 NodeRings resources (compute, DNS, firewall, game servers, IAM), namespaced and cluster-scoped, generated from the NodeRings Terraform provider.
+The changes in every version are listed in the [changelog](https://github.com/noderings/provider-upjet-noderings/blob/main/CHANGELOG.md) and on the [releases page](https://github.com/noderings/provider-upjet-noderings/releases).

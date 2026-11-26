@@ -1,4 +1,4 @@
-apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+apiVersion: iam.m.noderings.com/v1alpha1
 kind: RoleAssignment
 metadata:
   annotations:
@@ -18,7 +18,7 @@ spec:
 
 ---
 
-apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+apiVersion: iam.m.noderings.com/v1alpha1
 kind: Group
 metadata:
   annotations:

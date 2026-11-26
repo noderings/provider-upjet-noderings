@@ -5,7 +5,7 @@
 # the API (ListMarketplaceOfferings), `nr` CLI, or the Terraform
 # noderings_marketplace_offer data source. The test reads them from the uptest
 # data source (${data.planId}, ${data.regionId}).
-apiVersion: iam.noderings.m.crossplane.io/v1alpha1
+apiVersion: iam.m.noderings.com/v1alpha1
 kind: SSHKey
 metadata:
   name: laptop
@@ -22,7 +22,7 @@ spec:
     kind: ClusterProviderConfig
     name: default
 ---
-apiVersion: compute.noderings.m.crossplane.io/v1alpha1
+apiVersion: compute.m.noderings.com/v1alpha1
 kind: VirtualMachine
 metadata:
   name: web
@@ -46,7 +46,7 @@ spec:
     kind: ClusterProviderConfig
     name: default
 ---
-apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+apiVersion: firewall.m.noderings.com/v1alpha1
 kind: Ruleset
 metadata:
   name: vm-web
@@ -62,7 +62,7 @@ spec:
     kind: ClusterProviderConfig
     name: default
 ---
-apiVersion: firewall.noderings.m.crossplane.io/v1alpha1
+apiVersion: firewall.m.noderings.com/v1alpha1
 kind: RulesetAttachment
 metadata:
   name: web

@@ -1,4 +1,4 @@
-apiVersion: noderings.crossplane.io/v1beta1
+apiVersion: noderings.com/v1beta1
 kind: ProviderConfig
 metadata:
   name: default

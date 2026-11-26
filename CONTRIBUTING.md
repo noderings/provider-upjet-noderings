@@ -49,7 +49,13 @@ Examples that create billed resources say so at the top of the file. Use a test 
 
 ## Releases
 
-Maintainers run the **Publish Provider Package** workflow with a version such as `v0.2.0`. It pushes the package to `ghcr.io/noderings` and `xpkg.upbound.io/noderings`.
+Releases are automated with [release-please](https://github.com/googleapis/release-please). Write commit messages (or squash-merge titles) as [Conventional Commits](https://www.conventionalcommits.org/): `feat:` for new resources or fields, `fix:` for bug fixes, `deps:` for dependency bumps such as a new Terraform provider version.
+
+1. Every push to `main` updates one open pull request titled `chore: release X.Y.Z`, which collects the changes into `CHANGELOG.md` and bumps the version in the install instructions.
+2. Merging that pull request creates the `vX.Y.Z` tag and GitHub release.
+3. The tag starts the **Release** workflow. It builds the provider image and package for `linux/amd64` and `linux/arm64` and pushes them to `ghcr.io/noderings/provider-upjet-noderings:vX.Y.Z`. When the Upbound robot secrets (`XPKG_MIRROR_ACCESS_ID`, `XPKG_MIRROR_TOKEN`) are set, it also mirrors the package to `xpkg.upbound.io/noderings/provider-upjet-noderings`, which lists it on the Upbound Marketplace.
+
+The release bot needs the variable `RELEASE_BOT_APP_ID` and the secret `RELEASE_BOT_PRIVATE_KEY` (the organization's release GitHub App), because tags made with the workflow's own `GITHUB_TOKEN` do not start other workflows. To republish an existing tag, run the **Release** workflow manually from that tag.
 
 ## Code of conduct
 
