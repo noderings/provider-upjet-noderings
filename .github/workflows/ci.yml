@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - main
-      - release-*
+      # Maintenance branches such as release-0.1 (not release-please's branches).
+      - 'release-[0-9]*'
   pull_request: {}
   workflow_dispatch: {}
 
