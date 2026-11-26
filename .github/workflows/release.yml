@@ -7,6 +7,11 @@
 # Normally release-please pushes the vX.Y.Z tag when its release pull request
 # is merged. To republish an existing tag, run this workflow manually and pick
 # the tag in the "Use workflow from" menu.
+#
+# After the package is pushed, a follow-up job adds Artifact Hub / OCI
+# annotations to the GHCR image index (required for a container-images
+# listing). It does not change the Upbound mirror of an already-pushed tag
+# beyond what the reusable workflow already copies.
 name: Release
 
 on:
@@ -38,3 +43,29 @@ jobs:
       GHCR_PAT: ${{ secrets.GITHUB_TOKEN }}
       XPKG_MIRROR_ACCESS_ID: ${{ secrets.XPKG_MIRROR_ACCESS_ID }}
       XPKG_MIRROR_TOKEN: ${{ secrets.XPKG_MIRROR_TOKEN }}
+
+  # Artifact Hub lists multi-arch packages from annotations on the OCI index.
+  # The child manifests are Docker V2 and cannot carry those annotations.
+  annotate:
+    name: Add Artifact Hub annotations
+    needs: publish
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: oras-project/setup-oras@ac735097e22fe643015b0d19645f7c9a69942128 # v2.0.4
+      - name: Annotate the package index
+        env:
+          IMAGE: ghcr.io/noderings/provider-upjet-noderings:${{ github.ref_name }}
+        run: ./hack/annotate-artifacthub.sh "$IMAGE"
