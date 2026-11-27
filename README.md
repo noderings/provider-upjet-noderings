@@ -200,6 +200,10 @@ Open an [issue](https://github.com/noderings/provider-upjet-noderings/issues). F
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Every commit needs a [DCO](https://developercertificate.org/) sign-off (`git commit -s`).
 
+## Related
+
+The [Go SDK](https://github.com/noderings/noderings-go) is the official Go client for the NodeRings API.
+
 ## License
 
 Apache License 2.0. See [LICENSE](LICENSE).
