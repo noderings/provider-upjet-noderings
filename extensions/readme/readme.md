@@ -19,7 +19,7 @@ kind: Provider
 metadata:
   name: provider-upjet-noderings
 spec:
-  package: ghcr.io/noderings/provider-upjet-noderings:v0.2.0
+  package: ghcr.io/noderings/provider-upjet-noderings:v0.2.1
 ```
 <!-- x-release-please-end -->
 
@@ -32,7 +32,7 @@ Or with the Crossplane CLI:
 
 <!-- x-release-please-start-version -->
 ```bash
-crossplane xpkg install provider ghcr.io/noderings/provider-upjet-noderings:v0.2.0
+crossplane xpkg install provider ghcr.io/noderings/provider-upjet-noderings:v0.2.1
 ```
 <!-- x-release-please-end -->
 
