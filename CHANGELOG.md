@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/noderings/provider-upjet-noderings/compare/v0.2.0...v0.2.1) (2026-11-27)
+
+
+### Documentation
+
+* link the official Go SDK in the README ([#10](https://github.com/noderings/provider-upjet-noderings/issues/10)) ([fb85887](https://github.com/noderings/provider-upjet-noderings/commit/fb85887793f998318a268c2de84ef524289eb2f6))
+
 ## [0.2.0](https://github.com/noderings/provider-upjet-noderings/compare/v0.1.0...v0.2.0) (2026-11-26)
 
 
